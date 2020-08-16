@@ -1,0 +1,22 @@
+{
+  "name": "vue-dumb-calc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gearoffortune/vue-dumb-calc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gearoffortune/vue-dumb-calc/issues"
+  },
+  "homepage": "https://github.com/gearoffortune/vue-dumb-calc#readme",
+  "dependencies": {
+    "xstate": "^4.11.0"
+  }
+}
