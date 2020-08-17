@@ -29,6 +29,9 @@ const actionSet = {
         result: (context) => {
             return context.operatorSet[context.operator](((-1)**Number(context.firstOperandNegative))*Number(context.firstOperand), Number(context.secondOperand))
         }
+    }),
+    setFirstOperandNegative: assign({
+        firstOperandNegative: true
     })
 }
 const calcContext = {
@@ -57,7 +60,10 @@ const calcMachine = Machine({
                     cond: 'isNonNil',
                     actions: 'addNumToFirstOperand'
                 },
-                MINUS: 'firstNegative' 
+                MINUS: {
+                    target: 'firstNegative',
+                    actions: 'setFirstOperandNegative'
+                } 
             }
         },
         firstNegative: {
@@ -99,7 +105,8 @@ const calcMachine = Machine({
             on: {
                 EQUALS: {
                 target: 'result',
-                actions: 'calculateResult'
+                actions: 'calculateResult',
+                cond: 'isDivisibleByZero'
                 },
                 NUMBER: {
                     target: 'secondOperand',
@@ -126,6 +133,9 @@ const calcMachine = Machine({
         },
         isOperator(_, event) {
             return !!event.operator;
+        },
+        isDivisibleByZero(context, event) {
+            return context.operator !== '/' || context.secondOperand !== 0;
         }
     },
     actions: { ...actionSet }
