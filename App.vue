@@ -1,4 +1,35 @@
-import {Machine, interpret, assign} from'xstate';
+<template>
+    <div id="app">
+        <div class="output">
+            <div v-if="state.matches('start')||state.matches('firstOperand')">{{state.context.firstOperand}}</div>
+            <div v-if="state.matches('operator')">{{state.context.operator}}</div>
+            <div v-if="state.matches('secondOperand')">{{state.context.secondOperand}}</div>
+            <div v-if="state.matches('result')">{{state.context.result}}</div>
+        </div>
+        <button @click="send(getNumberEvent('1'))">1</button>
+        <button @click="send(getNumberEvent('2'))">2</button>
+        <button @click="send(getNumberEvent('3'))">3</button>
+        <button @click="send(getNumberEvent('4'))">4</button>
+        <button @click="send(getNumberEvent('5'))">5</button>
+        <button @click="send(getNumberEvent('6'))">6</button>
+        <button @click="send(getNumberEvent('7'))">7</button>
+        <button @click="send(getNumberEvent('8'))">8</button>
+        <button @click="send(getNumberEvent('9'))">9</button>
+        <button @click="send(getNumberEvent('0'))">0</button>
+        <button @click="send(getOperatorEvent('+'))">+</button>
+        <button @click="send(getOperatorEvent('-'))">-</button>
+        <button @click="send(getOperatorEvent('/'))">/</button>
+        <button @click="send(getOperatorEvent('*'))">*</button>
+        <button @click="send('EQUALS')">=</button>
+        <button @click="send('CLEAR_EVERYTHING')">CE</button>
+    </div>
+</template>
+
+<script>
+//TODO: investigate why state machine doesn't work when imported but works
+//when copy-pasted
+import { useMachine } from "@xstate/vue";
+import {Machine, assign} from'xstate';
 
 
 const actionSet = {
@@ -35,6 +66,14 @@ const actionSet = {
     }),
     setFirstOperandNegative: assign({
         firstOperandNegative: true
+    }),
+    resetAll: assign({
+        firstOperand: () => '0',
+        firstOperandNegative: () => false,
+        operator:() => undefined,
+        secondOperand: () => '0',
+        secondOperandNegative:() => false,
+        result: () => 0,
     })
 }
 const calcContext = {
@@ -52,7 +91,7 @@ const calcContext = {
     }
 }
 
-export const calcMachine = Machine({
+const calcMachine = Machine({
     id: 'calculator',
     initial: 'start',
     states: {
@@ -129,7 +168,7 @@ export const calcMachine = Machine({
     },
     context: {...calcContext},
     on: {
-        CLEAR_EVERYTHING: 'start'
+        CLEAR_EVERYTHING: {target: 'start', actions: 'resetAll'}
     }
 },
 {
@@ -146,12 +185,25 @@ export const calcMachine = Machine({
     },
     actions: { ...actionSet }
 })
+function getNumberEvent(number) {
+    return {
+        type: 'NUMBER',
+        number
+    }
+}
 
-const calc = interpret(calcMachine)
-.onTransition((state) => console.log(state.context))
-.start();
+function getOperatorEvent(operator) {
+    return {
+        type: 'OPERATOR',
+        operator
+    }
+}
 
-calc.send({type: 'NUMBER', number: "9"});
-calc.send({type: 'OPERATOR', operator: "-"});
-calc.send({type: 'NUMBER', number: "3"});
-calc.send('EQUALS');
+export default {
+    name: 'App',
+    setup() {
+    const { state, send } = useMachine(calcMachine);
+    return { state, send, getNumberEvent, getOperatorEvent };
+  }
+}
+</script>
